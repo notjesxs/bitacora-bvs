@@ -212,6 +212,55 @@ tbody td {
     border-color:#2563eb;
     background:#172554;
 }
+.detalle-modal{
+    padding:8px !important;
+}
+
+.detalle-modal .swal2-title{
+    font-size:24px !important;
+    margin-bottom:14px !important;
+}
+
+.case-modal{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    text-align:left;
+}
+
+.case-item{
+    background:#0f172a;
+    border:1px solid #334155;
+    border-radius:12px;
+    padding:10px 12px;
+}
+
+.case-item.full{
+    grid-column:1 / 3;
+}
+
+.case-item span{
+    display:block;
+    color:#94a3b8;
+    font-size:10px;
+    font-weight:900;
+    text-transform:uppercase;
+    margin-bottom:5px;
+}
+
+.case-item strong{
+    color:white;
+    font-size:13px;
+}
+
+.case-item p{
+    color:#e2e8f0;
+    margin:0;
+    font-size:13px;
+    line-height:1.4;
+    max-height:90px;
+    overflow-y:auto;
+}
 
 </style>
 
@@ -346,20 +395,45 @@ tbody td {
                             <td>{{ $bitacora->fecha_registro->format('d/m/Y') }}</td>
 
                             <td>
-                                <div class="actions">
-                                    <a href="{{ route('bitacoras.edit', $bitacora) }}" class="btn btn-warning">
-                                        Editar
-                                    </a>
+                                @if(auth()->id() == $bitacora->user_id)
 
-                                    <form action="{{ route('bitacoras.destroy', $bitacora) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
+                                    <div class="actions">
+                                        <a href="{{ route('bitacoras.edit', $bitacora) }}" class="btn btn-warning">
+                                            Editar
+                                        </a>
 
-                                        <button type="button" class="btn btn-danger btn-delete">
-                                            Eliminar
-                                        </button>
-                                    </form>
-                                </div>
+                                        <form action="{{ route('bitacoras.destroy', $bitacora) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="button" class="btn btn-danger btn-delete">
+                                                Eliminar
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                @else
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary btn-view"
+                                        data-id="{{ $bitacora->id }}"
+                                        data-tipo="{{ $bitacora->tipo_caso }}"
+                                        data-proceso="{{ $bitacora->proceso }}"
+                                        data-descripcion="{{ $bitacora->descripcion }}"
+                                        data-prioridad="{{ $bitacora->prioridad }}"
+                                        data-solucion="{{ $bitacora->solucion }}"
+                                        data-encargado="{{ $bitacora->encargado?->name ?? 'Sin usuario' }}"
+                                        data-fecha="{{ $bitacora->fecha_registro?->format('d/m/Y') }}"
+                                        data-tiempo="{{ $bitacora->tiempo_resolucion }}"
+                                        data-estado="{{ $bitacora->estado }}"
+                                        data-area="{{ $bitacora->area }}"
+                                        data-personal="{{ $bitacora->personal }}"
+                                    >
+                                        Ver Detalle
+                                    </button>
+
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -485,6 +559,84 @@ document.getElementById('btnExportarExcel').addEventListener('click', function (
 
     
 
+});
+</script>
+
+<script>
+document.querySelectorAll('.btn-view').forEach(button => {
+    button.addEventListener('click', function () {
+        Swal.fire({
+            title: 'Detalle del Caso #' + this.dataset.id,
+            width: '650px',
+            background: '#1e293b',
+            color: '#ffffff',
+            confirmButtonText: 'Cerrar',
+            confirmButtonColor: '#2563eb',
+            customClass: {
+                popup: 'detalle-modal'
+            },
+            html: `
+                <div class="case-modal">
+
+                    <div class="case-item">
+                        <span>Tipo de Caso</span>
+                        <strong>${this.dataset.tipo || '-'}</strong>
+                    </div>
+
+                    <div class="case-item">
+                        <span>Proceso</span>
+                        <strong>${this.dataset.proceso || '-'}</strong>
+                    </div>
+
+                    <div class="case-item">
+                        <span>Prioridad</span>
+                        <strong>${this.dataset.prioridad || '-'}</strong>
+                    </div>
+
+                    <div class="case-item">
+                        <span>Estado</span>
+                        <strong>${this.dataset.estado || '-'}</strong>
+                    </div>
+
+                    <div class="case-item">
+                        <span>Encargado</span>
+                        <strong>${this.dataset.encargado || '-'}</strong>
+                    </div>
+
+                    <div class="case-item">
+                        <span>Fecha Registro</span>
+                        <strong>${this.dataset.fecha || '-'}</strong>
+                    </div>
+
+                    <div class="case-item">
+                        <span>Tiempo Resolución</span>
+                        <strong>${this.dataset.tiempo || '-'}</strong>
+                    </div>
+
+                    <div class="case-item">
+                        <span>Área</span>
+                        <strong>${this.dataset.area || '-'}</strong>
+                    </div>
+
+                    <div class="case-item full">
+                        <span>Personal</span>
+                        <strong>${this.dataset.personal || '-'}</strong>
+                    </div>
+
+                    <div class="case-item full">
+                        <span>Descripción</span>
+                        <p>${this.dataset.descripcion || '-'}</p>
+                    </div>
+
+                    <div class="case-item full">
+                        <span>Solución</span>
+                        <p>${this.dataset.solucion || '-'}</p>
+                    </div>
+
+                </div>
+            `
+        });
+    });
 });
 </script>
 

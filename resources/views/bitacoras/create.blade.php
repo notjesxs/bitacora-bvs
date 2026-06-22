@@ -28,7 +28,7 @@
             <div class="grid">
                 <div>
                     <label>Tipo de Caso</label>
-                    <input type="text" name="tipo_caso" required>
+                    <input type="text" name="tipo_caso" required autofocus>
                 </div>
 
                 <div>

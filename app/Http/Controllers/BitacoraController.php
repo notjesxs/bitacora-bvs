@@ -72,11 +72,22 @@ class BitacoraController extends Controller
 
     public function edit(Bitacora $bitacora)
     {
+        abort_if(
+            auth()->id() !== $bitacora->user_id,
+            403
+        );
+
         return view('bitacoras.edit', compact('bitacora'));
     }
 
     public function update(Request $request, Bitacora $bitacora)
     {
+
+        abort_if(
+            auth()->id() !== $bitacora->user_id,
+            403
+        );
+
         $data = $request->validate([
             'tipo_caso' => 'required|string|max:255',
             'proceso' => 'required|string|max:255',
@@ -102,6 +113,11 @@ class BitacoraController extends Controller
 
     public function destroy(Bitacora $bitacora)
     {
+        abort_if(
+            auth()->id() !== $bitacora->user_id,
+            403
+        );
+
         $bitacora->delete();
 
         return redirect()->route('bitacoras.index')
