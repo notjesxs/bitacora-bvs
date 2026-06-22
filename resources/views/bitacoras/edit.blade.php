@@ -29,7 +29,10 @@
             <div class="grid">
                 <div>
                     <label>Tipo de Caso</label>
-                    <input type="text" name="tipo_caso" value="{{ $bitacora->tipo_caso }}" required>
+                    <select autofocus>
+                        <option value="TI" {{ $bitacora->tipo_caso == 'Requirimiento' ? 'selected' : '' }}>Requirimiento</option>
+                        <option value="Equipo de Operaciones" {{ $bitacora->tipo_caso == 'Incidente' ? 'selected' : '' }}>Incidente</option>
+                    </select>
                 </div>
 
                 <div>

@@ -28,7 +28,10 @@
             <div class="grid">
                 <div>
                     <label>Tipo de Caso</label>
-                    <input type="text" name="tipo_caso" required autofocus>
+                    <select name="tipo_caso" required autofocus>
+                        <option value="Requirimiento">Requirimiento</option>
+                        <option value="Incidente">Incidente</option>
+                    </select>
                 </div>
 
                 <div>
