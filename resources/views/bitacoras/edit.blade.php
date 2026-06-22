@@ -29,7 +29,7 @@
             <div class="grid">
                 <div>
                     <label>Tipo de Caso</label>
-                    <select autofocus>
+                    <select name="tipo_caso" autofocus>
                         <option value="TI" {{ $bitacora->tipo_caso == 'Requirimiento' ? 'selected' : '' }}>Requirimiento</option>
                         <option value="Equipo de Operaciones" {{ $bitacora->tipo_caso == 'Incidente' ? 'selected' : '' }}>Incidente</option>
                     </select>
@@ -70,7 +70,7 @@
 
                 <div>
                     <label>Área</label>
-                    <select>
+                    <select name="area">
                         <option value="TI" {{ $bitacora->area == 'TI' ? 'selected' : '' }}>TI</option>
                         <option value="Equipo de Operaciones" {{ $bitacora->area == 'Equipo de Operaciones' ? 'selected' : '' }}>Equipo de Operaciones</option>
                         <option value="Linea Naviera" {{ $bitacora->area == 'Linea Naviera' ? 'selected' : '' }}>Línea Naviera</option>
