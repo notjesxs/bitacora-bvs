@@ -246,7 +246,7 @@
         </div>
 
         <div class="brand-info">
-            <span class="brand-title">Bitácoras BVS</span>
+            <span class="brand-title">Bitácora BVS</span>
             <span class="brand-subtitle">Gestión interna de casos</span>
         </div>
     </a>
