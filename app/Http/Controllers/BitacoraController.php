@@ -128,7 +128,7 @@ class BitacoraController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setTitle('Bitácoras');
+        $sheet->setTitle('Bitácora');
 
         $sheet->mergeCells('A1:K1');
         $sheet->setCellValue('A1', 'REPORTE DE BITÁCORA BVS');

@@ -120,7 +120,7 @@
             </h1>
 
             <p class="register-subtitle">
-                Registra un usuario para acceder al sistema de Bitácoras BVS.
+                Registra un usuario para acceder al sistema de Bitácora BVS.
             </p>
 
             <form method="POST" action="{{ route('register') }}">

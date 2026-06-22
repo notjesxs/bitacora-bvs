@@ -365,7 +365,7 @@ tbody td {
                     @empty
                         <tr>
                             <td colspan="9" style="text-align:center;padding:30px">
-                                No hay bitácoras registradas.
+                                No hay casos registrados.
                             </td>
                         </tr>
                     @endforelse

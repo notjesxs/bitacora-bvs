@@ -132,7 +132,7 @@
             </div> --}}
 
             <h1 class="login-title">
-                Bitácoras BVS
+                Bitácora BVS
             </h1>
 
             <p class="login-subtitle">
