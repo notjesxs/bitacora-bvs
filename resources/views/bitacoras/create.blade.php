@@ -66,7 +66,15 @@
 
                 <div>
                     <label>Área</label>
-                    <input type="text" name="area" required>
+                    <select name="area">
+                        <option value="TI">TI</option>
+                        <option value="Equipo de Operaciones">Equipo de Operaciones</option>
+                        <option value="Linea Naviera">Línea Naviera</option>
+                        <option value="Proteccion">Protección</option>
+                        <option value="Comercial">Comercial</option>
+                        <option value="Cliente">Cliente</option>
+                        <option value="Reefer">Reefer</option>
+                    </select>
                 </div>
 
                 <div>

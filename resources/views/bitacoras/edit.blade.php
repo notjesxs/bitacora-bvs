@@ -67,7 +67,15 @@
 
                 <div>
                     <label>Área</label>
-                    <input type="text" name="area" value="{{ $bitacora->area }}" required>
+                    <select>
+                        <option value="TI" {{ $bitacora->area == 'TI' ? 'selected' : '' }}>TI</option>
+                        <option value="Equipo de Operaciones" {{ $bitacora->area == 'Equipo de Operaciones' ? 'selected' : '' }}>Equipo de Operaciones</option>
+                        <option value="Linea Naviera" {{ $bitacora->area == 'Linea Naviera' ? 'selected' : '' }}>Línea Naviera</option>
+                        <option value="Proteccion" {{ $bitacora->area == 'Proteccion' ? 'selected' : '' }}>Protección</option>
+                        <option value="Comercial" {{ $bitacora->area == 'Comercial' ? 'selected' : '' }}>Comercial</option>
+                        <option value="Cliente" {{ $bitacora->area == 'Cliente' ? 'selected' : '' }}>Cliente</option>
+                        <option value="Reefer" {{ $bitacora->area == 'Reefer' ? 'selected' : '' }}>Reefer</option>
+                    </select>
                 </div>
 
                 <div>
