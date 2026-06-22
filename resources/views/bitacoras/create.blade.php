@@ -96,7 +96,7 @@
             </div>
 
             <div class="actions">
-                <button class="btn btn-primary">Guardar Bitácora</button>
+                <button class="btn btn-primary">Guardar Caso</button>
                 <a href="{{ route('bitacoras.index') }}" class="btn btn-secondary">Volver</a>
             </div>
         </form>

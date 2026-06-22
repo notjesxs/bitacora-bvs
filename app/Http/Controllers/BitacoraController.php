@@ -67,7 +67,7 @@ class BitacoraController extends Controller
         Bitacora::create($data);
 
         return redirect()->route('bitacoras.index')
-            ->with('success', 'Bitácora registrada correctamente.');
+            ->with('success', 'Caso registrado correctamente.');
     }
 
     public function edit(Bitacora $bitacora)
@@ -108,7 +108,7 @@ class BitacoraController extends Controller
         $bitacora->update($data);
 
         return redirect()->route('bitacoras.index')
-            ->with('success', 'Bitácora actualizada correctamente.');
+            ->with('success', 'Caso actualizado correctamente.');
     }
 
     public function destroy(Bitacora $bitacora)
@@ -121,7 +121,7 @@ class BitacoraController extends Controller
         $bitacora->delete();
 
         return redirect()->route('bitacoras.index')
-            ->with('success', 'Bitácora eliminada correctamente.');
+            ->with('success', 'Caso eliminado correctamente.');
     }
 
     public function exportar(Request $request)
