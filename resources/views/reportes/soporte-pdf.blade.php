@@ -5,6 +5,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+    <title>FOR-SER-12_INFORME SOPORTE SOFTWARE -V.1.0</title>
+
     <style>
         @page {
             size: 1600px 900px;
@@ -1381,7 +1383,7 @@
         'incidenciaAreaChart',
         @json($areasIncidenciaLabels),
         @json($areasIncidenciaData),
-        { barThickness: 36, stepSize: 1, labelWidth: 165, fontSize: 15 }
+        { barThickness: 36, stepSize: 1, labelWidth: 260, fontSize: 15 }
     );
 
     createHorizontalBarChart(
@@ -1402,7 +1404,7 @@
         'requerimientoAreaChart',
         @json($areasRequerimientoLabels),
         @json($areasRequerimientoData),
-        { barThickness: 36, stepSize: 5, labelWidth: 165, fontSize: 15 }
+        { barThickness: 36, stepSize: 5, labelWidth: 260, fontSize: 15 }
     );
 
     createHorizontalBarChart(
