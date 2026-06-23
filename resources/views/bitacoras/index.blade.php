@@ -262,6 +262,96 @@ tbody td {
     overflow-y:auto;
 }
 
+@media (max-width: 768px){
+
+    .page{
+        padding:12px;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+    }
+
+    .stat{
+        padding:14px;
+    }
+
+    .stat h3{
+        font-size:22px;
+    }
+
+    .topbar{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .topbar-actions{
+        width:100%;
+        flex-direction:column;
+    }
+
+    .topbar-actions .btn{
+        width:100%;
+        justify-content:center;
+    }
+
+    .filters{
+        grid-template-columns:1fr;
+    }
+
+    .filter-actions{
+        flex-direction:column;
+    }
+
+    .filter-actions .btn{
+        width:100%;
+        justify-content:center;
+    }
+
+    .card{
+        padding:14px;
+    }
+
+    .title{
+        font-size:20px;
+    }
+
+    table{
+        min-width:950px;
+    }
+
+    .actions{
+        flex-direction:column;
+    }
+
+    .actions .btn{
+        width:100%;
+        justify-content:center;
+    }
+
+    .pagination-box{
+        overflow-x:auto;
+        padding:12px;
+    }
+
+    .case-modal{
+        grid-template-columns:1fr;
+    }
+
+    .case-item.full{
+        grid-column:auto;
+    }
+
+    .detalle-modal{
+        width:95% !important;
+    }
+
+    .detalle-modal .swal2-title{
+        font-size:18px !important;
+    }
+}
+
 </style>
 
 <div class="page">
@@ -567,7 +657,7 @@ document.querySelectorAll('.btn-view').forEach(button => {
     button.addEventListener('click', function () {
         Swal.fire({
             title: 'Detalle del Caso #' + this.dataset.id,
-            width: '650px',
+            width: window.innerWidth < 768 ? '95%' : '650px',
             background: '#1e293b',
             color: '#ffffff',
             confirmButtonText: 'Cerrar',
