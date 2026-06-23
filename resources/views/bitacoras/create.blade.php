@@ -63,7 +63,7 @@
                     <select name="estado">
                         <option value="PENDIENTE">PENDIENTE</option>
                         <option value="EN_PROCESO">EN PROCESO</option>
-                        <option value="RESUELTO">RESUELTO</option>
+                        <option value="RESUELTO" selected>RESUELTO</option>
                     </select>
                 </div>
 
