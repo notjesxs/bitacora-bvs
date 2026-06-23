@@ -15,6 +15,9 @@ Route::redirect('/', '/login');
 Route::get('/bitacoras-exportar', [BitacoraController::class, 'exportar'])
     ->name('bitacoras.exportar');
 
+Route::get('/bitacoras-generar-ppt', [BitacoraController::class, 'generarPpt'])
+    ->name('bitacoras.generarPpt');
+
 Route::middleware(['auth'])->group(function () {
 
     // Bitácoras

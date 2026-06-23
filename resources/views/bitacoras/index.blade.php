@@ -79,6 +79,7 @@ body{background:var(--bg)}
 .btn-success{background:var(--green);color:white}
 .btn-warning{background:var(--orange);color:white}
 .btn-danger{background:var(--red);color:white}
+.btn-orange{background:var(--orange);color:white}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:separate;border-spacing:0 10px}
 thead th{
@@ -398,15 +399,18 @@ tbody td {
                 <button type="button" class="btn btn-success" id="btnExportarExcel">
                     Exportar Excel
                 </button>
-            </div>
-
+            
+                <button type="button" class="btn btn-orange" id="btnGenerarPpt">
+                    Generar PPT
+                </button>
         </div>
+    </div>
 
-        @if(session('success'))
+    @if(session('success'))
             <div class="alert">{{ session('success') }}</div>
-        @endif
+    @endif
 
-        <form method="GET" action="{{ route('bitacoras.index') }}" class="filters">
+    <form method="GET" action="{{ route('bitacoras.index') }}" class="filters">
             <div>
                 <label>Encargado</label>
                 <select name="encargado_id">
@@ -433,9 +437,9 @@ tbody td {
                 <button type="submit" class="btn btn-primary">Filtrar</button>
                 <a href="{{ route('bitacoras.index') }}" class="btn btn-secondary">Limpiar</a>
             </div>
-        </form>
+    </form>
 
-        <div class="table-wrap">
+    <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
@@ -538,9 +542,9 @@ tbody td {
         </div>
 
         <div class="pagination-box">
-    {{ $bitacoras->onEachSide(1)->links('pagination::simple-tailwind') }}
-</div>
+        {{ $bitacoras->onEachSide(1)->links('pagination::simple-tailwind') }}
     </div>
+</div>
 </div>
 
 <script>
@@ -653,6 +657,53 @@ document.getElementById('btnExportarExcel').addEventListener('click', function (
 </script>
 
 <script>
+document.getElementById('btnGenerarPpt').addEventListener('click', function () {
+    const hoy = new Date();
+
+    const actual = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0');
+
+    const anteriorDate = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+    const anterior = anteriorDate.getFullYear() + '-' + String(anteriorDate.getMonth() + 1).padStart(2, '0');
+
+    const meses = [
+        'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+        'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+    ];
+
+    Swal.fire({
+        title: 'Generar informe PPT',
+        html: `
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:18px">
+                <label class="export-option">
+                    <input type="radio" name="mes_ppt" value="${actual}" checked>
+                    ${meses[hoy.getMonth()]} ${hoy.getFullYear()}
+                </label>
+
+                <label class="export-option">
+                    <input type="radio" name="mes_ppt" value="${anterior}">
+                    ${meses[anteriorDate.getMonth()]} ${anteriorDate.getFullYear()}
+                </label>
+            </div>
+        `,
+        background:'#1e293b',
+        color:'#fff',
+        showCancelButton:true,
+        confirmButtonText:'Generar PPT',
+        cancelButtonText:'Cancelar',
+        confirmButtonColor:'#2563eb',
+        cancelButtonColor:'#64748b',
+        preConfirm: () => {
+            return document.querySelector('input[name="mes_ppt"]:checked').value;
+        }
+    }).then((result) => {
+        if(result.isConfirmed){
+            window.location.href = "{{ route('bitacoras.generarPpt') }}?mes=" + result.value;
+        }
+    });
+});
+</script>
+
+<script>
 document.querySelectorAll('.btn-view').forEach(button => {
     button.addEventListener('click', function () {
         Swal.fire({
@@ -735,7 +786,7 @@ document.querySelectorAll('.btn-view').forEach(button => {
 Swal.fire({
     icon: 'warning',
     title: 'Sin información',
-    text: '{{ session('error') }}',
+    text: @json(session('error')),
     background:'#1e293b',
     color:'#fff',
     confirmButtonColor:'#f59e0b'

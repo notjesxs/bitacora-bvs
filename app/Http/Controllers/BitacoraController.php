@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\Process\Process;
+
 
 class BitacoraController extends Controller
 {
@@ -396,4 +398,157 @@ class BitacoraController extends Controller
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
     }
+
+    public function generarPpt(Request $request)
+    {
+        $request->validate([
+            'mes' => 'required'
+        ]);
+
+        $mes = $request->mes;
+        $nombreMes = $this->nombreMes($mes);
+
+        $base = Bitacora::whereRaw("TO_CHAR(fecha_registro, 'YYYY-MM') = ?", [$mes]);
+
+        $incidentes = (clone $base)
+            ->whereRaw("LOWER(tipo_caso) LIKE ?", ['incid%'])
+            ->count();
+
+        $requerimientos = (clone $base)
+            ->whereRaw("LOWER(tipo_caso) LIKE ?", ['requer%'])
+            ->count();
+        
+        $horasIncidentes = (clone $base)
+            ->whereRaw("LOWER(tipo_caso) LIKE ?", ['incid%'])
+            ->sum('tiempo_resolucion');
+
+        $horasRequerimientos = (clone $base)
+            ->whereRaw("LOWER(tipo_caso) LIKE ?", ['requer%'])
+            ->sum('tiempo_resolucion');
+
+        $promedioIncidentes = $incidentes > 0
+            ? round($horasIncidentes / $incidentes, 1)
+            : 0;
+
+        $promedioRequerimientos = $requerimientos > 0
+            ? round($horasRequerimientos / $requerimientos, 1)
+            : 0;
+
+        if ($incidentes == 0 && $requerimientos == 0) {
+            return redirect()
+                ->route('bitacoras.index')
+                ->with('error', 'No existen casos para el mes seleccionado.');
+        }
+
+        $data = [
+            'mes' => $mes,
+            'nombreMes' => $nombreMes,
+            'incidentes' => $incidentes,
+            'requerimientos' => $requerimientos,
+
+            'incidenciasPorArea' => $this->formatPptData(
+                $this->agruparCasos($mes, 'incid%', 'area')
+            ),
+
+            'tiposIncidentes' => $this->formatPptData(
+                $this->agruparCasos($mes, 'incid%', 'proceso')
+            ),
+
+            'usuariosIncidentes' => $this->formatPptData(
+                $this->agruparCasos($mes, 'incid%', 'personal', 10)
+            ),
+
+            'requerimientosPorArea' => $this->formatPptData(
+                $this->agruparCasos($mes, 'requer%', 'area')
+            ),
+
+            'tiposRequerimientos' => $this->formatPptData(
+                $this->agruparCasos($mes, 'requer%', 'proceso')
+            ),
+
+            'usuariosRequerimientos' => $this->formatPptData(
+                $this->agruparCasos($mes, 'requer%', 'personal', 12)
+            ),
+            'totalHorasAtencionIncidentes' => $horasIncidentes,
+            'promedioHorasAtencionIncidentes' => $promedioIncidentes,
+
+            'totalHorasAtencionRequerimientos' => $horasRequerimientos,
+            'promedioHorasAtencionRequerimientos' => $promedioRequerimientos,
+        ];
+
+        $jsonPath = storage_path('app/reporte_soporte_' . uniqid() . '.json');
+        $pptPath = storage_path('app/Informe-Soporte-' . $mes . '.pptx');
+
+        file_put_contents($jsonPath, json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        $process = new Process([
+            'node',
+            base_path('resources/js/generar-reporte-ppt.cjs'),
+            $jsonPath,
+            $pptPath
+        ]);
+
+        $process->setTimeout(120);
+        $process->run();
+
+        @unlink($jsonPath);
+
+        if (!$process->isSuccessful()) {
+            return redirect()
+                ->route('bitacoras.index')
+                ->with('error', 'Error generando PPT: ' . $process->getErrorOutput());
+        }
+
+        return response()
+            ->download($pptPath, 'FOR-SER-12_INFORME SOPORTE SOFTWARE -V.1.0 ' . $nombreMes . '.pptx')
+            ->deleteFileAfterSend(true);
+    }
+
+    private function formatPptData($collection)
+    {
+        return $collection->map(function ($total, $label) {
+            return [
+                'label' => (string) $label,
+                'total' => (int) $total,
+            ];
+        })->values()->toArray();
+    }
+
+    private function nombreMes($mes)
+    {
+        [$anio, $numeroMes] = explode('-', $mes);
+
+        $meses = [
+            '01' => 'Enero',
+            '02' => 'Febrero',
+            '03' => 'Marzo',
+            '04' => 'Abril',
+            '05' => 'Mayo',
+            '06' => 'Junio',
+            '07' => 'Julio',
+            '08' => 'Agosto',
+            '09' => 'Septiembre',
+            '10' => 'Octubre',
+            '11' => 'Noviembre',
+            '12' => 'Diciembre',
+        ];
+
+        return ($meses[$numeroMes] ?? $numeroMes) . ' ' . $anio;
+    }
+
+    private function agruparCasos($mes, $tipo, $campo, $limit = null)
+    {
+        $query = Bitacora::whereRaw("TO_CHAR(fecha_registro, 'YYYY-MM') = ?", [$mes])
+            ->whereRaw("LOWER(tipo_caso) LIKE ?", [$tipo])
+            ->selectRaw("COALESCE(NULLIF(TRIM({$campo}), ''), 'SIN DATO') as label, COUNT(*) as total")
+            ->groupByRaw("COALESCE(NULLIF(TRIM({$campo}), ''), 'SIN DATO')")
+            ->orderByDesc('total');
+
+        if ($limit) {
+            $query->limit($limit);
+        }
+
+        return $query->get()->pluck('total', 'label');
+    }
+    
 }
