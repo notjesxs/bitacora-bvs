@@ -400,8 +400,12 @@ tbody td {
                     Exportar Excel
                 </button>
             
-                <button type="button" class="btn btn-orange" id="btnGenerarPpt">
+                {{-- <button type="button" class="btn btn-orange" id="btnGenerarPpt">
                     Generar PPT
+                </button> --}}
+
+                <button type="button" class="btn btn-danger" id="btnGenerarPdf">
+                    Generar PDF
                 </button>
         </div>
     </div>
@@ -656,7 +660,7 @@ document.getElementById('btnExportarExcel').addEventListener('click', function (
 });
 </script>
 
-<script>
+{{-- <script>
 document.getElementById('btnGenerarPpt').addEventListener('click', function () {
     const hoy = new Date();
 
@@ -701,7 +705,77 @@ document.getElementById('btnGenerarPpt').addEventListener('click', function () {
         }
     });
 });
+</script> --}}
+
+<script>
+document.getElementById('btnGenerarPdf').addEventListener('click', function () {
+    const hoy = new Date();
+
+    const actual = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0');
+
+    const anteriorDate = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+    const anterior = anteriorDate.getFullYear() + '-' + String(anteriorDate.getMonth() + 1).padStart(2, '0');
+
+    const meses = [
+        'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+        'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+    ];
+
+    Swal.fire({
+        title: 'Generar informe PDF',
+        html: `
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:18px">
+                <label class="export-option">
+                    <input type="radio" name="mes_pdf" value="${actual}" checked>
+                    ${meses[hoy.getMonth()]} ${hoy.getFullYear()}
+                </label>
+
+                <label class="export-option">
+                    <input type="radio" name="mes_pdf" value="${anterior}">
+                    ${meses[anteriorDate.getMonth()]} ${anteriorDate.getFullYear()}
+                </label>
+            </div>
+        `,
+        background:'#1e293b',
+        color:'#fff',
+        showCancelButton:true,
+        confirmButtonText:'Generar PDF',
+        cancelButtonText:'Cancelar',
+        confirmButtonColor:'#2563eb',
+        cancelButtonColor:'#64748b',
+        preConfirm: () => {
+            return document.querySelector('input[name="mes_pdf"]:checked').value;
+        }
+    }).then((result) => {
+
+        if(result.isConfirmed){
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{{ route('bitacoras.generarPdf') }}";
+
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_token';
+            csrf.value = "{{ csrf_token() }}";
+
+            const mes = document.createElement('input');
+            mes.type = 'hidden';
+            mes.name = 'mes';
+            mes.value = result.value;
+
+            form.appendChild(csrf);
+            form.appendChild(mes);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+    });
+});
 </script>
+
+
 
 <script>
 document.querySelectorAll('.btn-view').forEach(button => {

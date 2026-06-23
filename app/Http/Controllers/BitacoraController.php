@@ -9,7 +9,7 @@ use App\Models\User;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\Process\Process;
-
+use Spatie\Browsershot\Browsershot;
 
 class BitacoraController extends Controller
 {
@@ -549,6 +549,191 @@ class BitacoraController extends Controller
         }
 
         return $query->get()->pluck('total', 'label');
+    }
+
+    public function generarPdf(Request $request)
+    {
+        $request->validate([
+            'mes' => 'required'
+        ]);
+
+        $mes = $request->mes;
+        $nombreMes = $this->nombreMes($mes);
+
+        $base = Bitacora::whereRaw("TO_CHAR(fecha_registro, 'YYYY-MM') = ?", [$mes]);
+
+        $incidentes = (clone $base)
+            ->whereRaw("LOWER(tipo_caso) LIKE ?", ['incid%'])
+            ->count();
+
+        $requerimientos = (clone $base)
+            ->whereRaw("LOWER(tipo_caso) LIKE ?", ['requer%'])
+            ->count();
+
+        if ($incidentes == 0 && $requerimientos == 0) {
+            return redirect()
+                ->route('bitacoras.index')
+                ->with('error', 'No existen casos para el mes seleccionado.');
+        }
+
+        $horasIncidentes = (clone $base)
+            ->whereRaw("LOWER(tipo_caso) LIKE ?", ['incid%'])
+            ->sum('tiempo_resolucion');
+
+        $horasRequerimientos = (clone $base)
+            ->whereRaw("LOWER(tipo_caso) LIKE ?", ['requer%'])
+            ->sum('tiempo_resolucion');
+
+        $incidenciasPorAreaRaw = $this->agruparCasos($mes, 'incid%', 'area');
+        $requerimientosPorAreaRaw = $this->agruparCasos($mes, 'requer%', 'area');
+
+        $incidenciasPorArea = $this->formatPptData($incidenciasPorAreaRaw);
+        $requerimientosPorArea = $this->formatPptData($requerimientosPorAreaRaw);
+
+        $areaTopIncidencia = $incidenciasPorAreaRaw->keys()->first() ?? 'SIN DATO';
+        $cantidadTopIncidencia = $incidenciasPorAreaRaw->first() ?? 0;
+
+        $porcentajeAreaTopIncidencia = $incidentes > 0
+            ? round(($cantidadTopIncidencia / $incidentes) * 100, 1)
+            : 0;
+
+        $promedioHorasIncidencia = $incidentes > 0
+            ? round($horasIncidentes / $incidentes, 2)
+            : 0;
+
+        $tiposIncidentesRaw = $this->agruparCasos($mes, 'incid%', 'proceso');
+        $tiposIncidentes = $this->formatPptData($tiposIncidentesRaw);
+
+        $tipoTopIncidencia = $tiposIncidentesRaw->keys()->first() ?? 'SIN DATO';
+        $cantidadTipoTopIncidencia = $tiposIncidentesRaw->first() ?? 0;
+
+        $porcentajeTipoTopIncidencia = $incidentes > 0
+            ? round(($cantidadTipoTopIncidencia / $incidentes) * 100, 1)
+            : 0;
+
+        $usuariosIncidentesRaw = $this->agruparCasos($mes, 'incid%', 'personal', 10);
+        $usuariosIncidentes = $this->formatPptData($usuariosIncidentesRaw);
+
+        $usuarioTopIncidencia = $usuariosIncidentesRaw->keys()->first() ?? 'SIN DATO';
+        $cantidadUsuarioTopIncidencia = $usuariosIncidentesRaw->first() ?? 0;
+
+        $porcentajeUsuarioTopIncidencia = $incidentes > 0
+            ? round(($cantidadUsuarioTopIncidencia / $incidentes) * 100, 1)
+            : 0;
+
+        $areaTopRequerimiento = $requerimientosPorAreaRaw->keys()->first() ?? 'SIN DATO';
+        $cantidadAreaTopRequerimiento = $requerimientosPorAreaRaw->first() ?? 0;
+
+        $porcentajeAreaTopRequerimiento = $requerimientos > 0
+            ? round(($cantidadAreaTopRequerimiento / $requerimientos) * 100, 1)
+            : 0;
+
+        $promedioHorasRequerimiento = $requerimientos > 0
+            ? round($horasRequerimientos / $requerimientos, 2)
+            : 0;
+
+        $tiposRequerimientosRaw = $this->agruparCasos($mes, 'requer%', 'proceso');
+        $tiposRequerimientos = $this->formatPptData($tiposRequerimientosRaw);
+
+        $tipoTopRequerimiento = $tiposRequerimientosRaw->keys()->first() ?? 'SIN DATO';
+        $cantidadTipoTopRequerimiento = $tiposRequerimientosRaw->first() ?? 0;
+
+        $porcentajeTipoTopRequerimiento = $requerimientos > 0
+            ? round(($cantidadTipoTopRequerimiento / $requerimientos) * 100, 1)
+            : 0;
+        $usuariosRequerimientosRaw = $this->agruparCasos($mes, 'requer%', 'personal', 15);
+        $usuariosRequerimientos = $this->formatPptData($usuariosRequerimientosRaw);
+
+        $usuarioTopRequerimiento = $usuariosRequerimientosRaw->keys()->first() ?? 'SIN DATO';
+        $cantidadUsuarioTopRequerimiento = $usuariosRequerimientosRaw->first() ?? 0;
+
+        $porcentajeUsuarioTopRequerimiento = $requerimientos > 0
+            ? round(($cantidadUsuarioTopRequerimiento / $requerimientos) * 100, 1)
+            : 0;
+
+        $data = [
+            'mes' => $mes,
+            'nombreMes' => $nombreMes,
+
+            'incidentes' => $incidentes,
+            'requerimientos' => $requerimientos,
+            'total' => $incidentes + $requerimientos,
+
+            'horasIncidentes' => round($horasIncidentes, 2),
+            'horasRequerimientos' => round($horasRequerimientos, 2),
+
+            'incidenciasPorArea' => $incidenciasPorArea,
+            'requerimientosPorArea' => $requerimientosPorArea,
+
+            'areasIncidenciaLabels' => collect($incidenciasPorArea)->pluck('label')->toArray(),
+            'areasIncidenciaData' => collect($incidenciasPorArea)->pluck('total')->toArray(),
+
+            'totalIncidencias' => $incidentes,
+            'totalHorasIncidencia' => round($horasIncidentes, 2),
+            'promedioHorasIncidencia' => $promedioHorasIncidencia,
+
+            'areaTopIncidencia' => $areaTopIncidencia,
+            'cantidadTopIncidencia' => $cantidadTopIncidencia,
+            'porcentajeAreaTopIncidencia' => $porcentajeAreaTopIncidencia,
+
+            'tiposIncidentesLabels' => collect($tiposIncidentes)->pluck('label')->toArray(),
+            'tiposIncidentesData' => collect($tiposIncidentes)->pluck('total')->toArray(),
+
+            'tipoTopIncidencia' => $tipoTopIncidencia,
+            'cantidadTipoTopIncidencia' => $cantidadTipoTopIncidencia,
+            'porcentajeTipoTopIncidencia' => $porcentajeTipoTopIncidencia,
+
+            'usuariosIncidentesLabels' => collect($usuariosIncidentes)->pluck('label')->toArray(),
+            'usuariosIncidentesData' => collect($usuariosIncidentes)->pluck('total')->toArray(),
+
+            'usuarioTopIncidencia' => $usuarioTopIncidencia,
+            'totalUsuariosIncidencia' => count($usuariosIncidentes),
+            'cantidadUsuarioTopIncidencia' => $cantidadUsuarioTopIncidencia,
+            'porcentajeUsuarioTopIncidencia' => $porcentajeUsuarioTopIncidencia,
+
+            'areasRequerimientoLabels' => collect($requerimientosPorArea)->pluck('label')->toArray(),
+            'areasRequerimientoData' => collect($requerimientosPorArea)->pluck('total')->toArray(),
+
+            'totalRequerimientos' => $requerimientos,
+            'totalHorasRequerimiento' => round($horasRequerimientos, 2),
+            'promedioHorasRequerimiento' => $promedioHorasRequerimiento,
+
+            'areaTopRequerimiento' => $areaTopRequerimiento,
+            'cantidadAreaTopRequerimiento' => $cantidadAreaTopRequerimiento,
+            'porcentajeAreaTopRequerimiento' => $porcentajeAreaTopRequerimiento,
+
+            'tiposRequerimientos' => $tiposRequerimientos,
+            'tiposRequerimientoLabels' => collect($tiposRequerimientos)->pluck('label')->toArray(),
+            'tiposRequerimientoData' => collect($tiposRequerimientos)->pluck('total')->toArray(),
+
+            'tipoTopRequerimiento' => $tipoTopRequerimiento,
+            'cantidadTipoTopRequerimiento' => $cantidadTipoTopRequerimiento,
+            'porcentajeTipoTopRequerimiento' => $porcentajeTipoTopRequerimiento,
+
+            'usuariosRequerimientos' => $usuariosRequerimientos,
+            'usuariosRequerimientoLabels' => collect($usuariosRequerimientos)->pluck('label')->toArray(),
+            'usuariosRequerimientoData' => collect($usuariosRequerimientos)->pluck('total')->toArray(),
+            'totalUsuariosRequerimiento' => count($usuariosRequerimientos),
+            'usuarioTopRequerimiento' => $usuarioTopRequerimiento,
+            'cantidadUsuarioTopRequerimiento' => $cantidadUsuarioTopRequerimiento,
+            'porcentajeUsuarioTopRequerimiento' => $porcentajeUsuarioTopRequerimiento,
+        ];
+
+        $html = view('reportes.soporte-pdf', $data)->render();
+
+        $pdfPath = storage_path('app/Informe-Soporte-' . $mes . '.pdf');
+
+        Browsershot::html($html)
+            ->setChromePath('/usr/bin/chromium')
+            ->noSandbox()
+            ->paperSize(1600, 900, 'px')
+            ->showBackground()
+            ->waitUntilNetworkIdle()
+            ->savePdf($pdfPath);
+
+        return response()
+            ->download($pdfPath, 'FOR-SER-12_INFORME SOPORTE SOFTWARE -V.1.0 ' . $nombreMes . '.pdf')
+            ->deleteFileAfterSend(true);
     }
     
 }

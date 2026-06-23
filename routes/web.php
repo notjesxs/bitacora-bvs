@@ -18,6 +18,9 @@ Route::get('/bitacoras-exportar', [BitacoraController::class, 'exportar'])
 Route::get('/bitacoras-generar-ppt', [BitacoraController::class, 'generarPpt'])
     ->name('bitacoras.generarPpt');
 
+Route::post('/bitacoras/generar-pdf', [BitacoraController::class, 'generarPdf'])
+    ->name('bitacoras.generarPdf');
+
 Route::middleware(['auth'])->group(function () {
 
     // Bitácoras

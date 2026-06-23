@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     zip \
     curl \
+    chromium \
     libpq-dev \
     libzip-dev \
     libpng-dev \
@@ -24,6 +25,8 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
@@ -33,6 +36,7 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 
 RUN npm install
+RUN npm install puppeteer
 RUN npm run build
 
 RUN mkdir -p storage/framework/cache \
