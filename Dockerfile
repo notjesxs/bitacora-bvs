@@ -6,6 +6,9 @@ RUN apt-get update && apt-get install -y \
     zip \
     curl \
     chromium \
+    fonts-liberation \
+    fonts-dejavu \
+    fontconfig \
     libpq-dev \
     libzip-dev \
     libpng-dev \
@@ -14,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     nodejs \
     npm \
+    && fc-cache -f -v \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         pdo \

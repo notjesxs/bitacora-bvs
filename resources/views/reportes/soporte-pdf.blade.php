@@ -30,7 +30,7 @@
 
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: "Liberation Sans", Arial, sans-serif;
             background: #fff;
             color: #111;
         }
@@ -1202,6 +1202,9 @@
 </section>
 
 <script>
+    Chart.defaults.font.family = 'Liberation Sans';
+    Chart.defaults.font.weight = 'bold';
+    
     const chartColors = @json($chartPalette);
 
     const dashboardData = [{{ $incidentes }}, {{ $requerimientos }}];
@@ -1220,7 +1223,7 @@
 
                     ctx.save();
                     ctx.fillStyle = '#0b2344';
-                    ctx.font = isHorizontal ? 'bold 16px Arial' : 'bold 30px Arial';
+                    ctx.font = isHorizontal ? 'bold 16px "Liberation Sans"' : 'bold 30px "Liberation Sans"';
                     ctx.textAlign = isHorizontal ? 'left' : 'center';
                     ctx.textBaseline = 'middle';
 
