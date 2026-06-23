@@ -62,10 +62,13 @@ class BitacoraController extends Controller
             'personal' => 'nullable|string|max:255',
         ]);
 
+        $data['personal'] = !empty($data['personal'])
+            ? mb_convert_case(mb_strtolower(trim($data['personal']), 'UTF-8'), MB_CASE_TITLE, 'UTF-8')
+            : null;
+
         $data['user_id'] = Auth::id();
 
         Bitacora::create($data);
-
         return redirect()->route('bitacoras.index')
             ->with('success', 'Caso registrado correctamente.');
     }
@@ -104,6 +107,10 @@ class BitacoraController extends Controller
         if ($request->estado === 'CERRADO' || $request->estado === 'RESUELTO') {
             $data['fecha_cierre'] = now();
         }
+
+        $data['personal'] = !empty($data['personal'])
+        ? mb_convert_case(mb_strtolower(trim($data['personal']), 'UTF-8'), MB_CASE_TITLE, 'UTF-8')
+        : null;
 
         $bitacora->update($data);
 
@@ -150,7 +157,10 @@ class BitacoraController extends Controller
         $sheet->setCellValue('A1', 'REPORTE DE BITÁCORA BVS');
 
         $sheet->mergeCells('A2:K2');
-        $sheet->setCellValue('A2', 'Mes: ' . $request->mes . ' | Generado: ' . now()->format('d/m/Y H:i'));
+        $sheet->setCellValue(
+            'A2',
+            'Mes: ' . $request->mes . ' | Generado: ' . now()->timezone('America/Lima')->format('d/m/Y H:i')
+        );
 
         $headers = [
             'TIPO CASO',
