@@ -450,8 +450,8 @@
 
         .portada-texto{
             position:absolute;
-            left:15px;
-            bottom:0;
+            left:5px;
+            bottom: 15px;
 
             width:625px;
             height:305px;
