@@ -139,6 +139,9 @@ class BitacoraController extends Controller
             'mes' => 'required'
         ]);
 
+        $mes = $request->mes;
+        $nombreMes = $this->nombreMes($mes);
+
         $bitacoras = Bitacora::with('encargado')
             ->whereRaw("TO_CHAR(fecha_registro, 'YYYY-MM') = ?", [$request->mes])
             ->orderBy('fecha_registro', 'desc')
@@ -388,7 +391,7 @@ class BitacoraController extends Controller
         $sheet->freezePane('A5');
         $sheet->setAutoFilter("A4:K{$lastRow}");
 
-        $filename = 'bitacora-' . $request->mes . '.xlsx';
+        $filename = 'BITACORA ' . $nombreMes . ' - INFORME.xlsx';
 
         $writer = new Xlsx($spreadsheet);
 
@@ -724,7 +727,7 @@ class BitacoraController extends Controller
         $pdfPath = storage_path('app/Informe-Soporte-' . $mes . '.pdf');
 
         Browsershot::html($html)
-            ->setChromePath('/usr/bin/chromium')
+            ->setChromePath(env('BROWSER_PATH')) // Ajusta la ruta según tu sistema operativo
             ->noSandbox()
             ->paperSize(1600, 900, 'px')
             ->showBackground()
