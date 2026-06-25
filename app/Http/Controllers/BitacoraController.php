@@ -727,7 +727,7 @@ class BitacoraController extends Controller
         $pdfPath = storage_path('app/Informe-Soporte-' . $mes . '.pdf');
 
         Browsershot::html($html)
-            ->setChromePath(env('BROWSER_PATH')) // Ajusta la ruta según tu sistema operativo
+            ->setChromePath(config('services.browser.path')) // Ajusta la ruta según tu sistema operativo
             ->noSandbox()
             ->paperSize(1600, 900, 'px')
             ->showBackground()
