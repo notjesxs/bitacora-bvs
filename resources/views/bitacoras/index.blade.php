@@ -392,9 +392,11 @@ tbody td {
             </div>
 
         <div class="topbar-actions">
-            <a href="{{ route('bitacoras.create') }}" class="btn btn-primary">
-                + Nuevo Caso
-            </a>
+                 @if(Auth::id() !== 8)
+                    <a href="{{ route('bitacoras.create') }}" class="btn btn-primary">
+                        + Nuevo Caso
+                    </a>
+                @endif
 
                 <button type="button" class="btn btn-success" id="btnExportarExcel">
                     Exportar Excel
@@ -824,7 +826,7 @@ document.querySelectorAll('.btn-view').forEach(button => {
                     </div>
 
                     <div class="case-item">
-                        <span>Tiempo Resolución</span>
+                        <span>Tiempo Solución</span>
                         <strong>${this.dataset.tiempo || '-'}</strong>
                     </div>
 

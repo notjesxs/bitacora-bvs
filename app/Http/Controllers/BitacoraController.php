@@ -33,7 +33,9 @@ class BitacoraController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $usuarios = User::orderBy('name')->get();
+        $usuarios = User::where('id', '!=', 8)
+        ->orderBy('name')
+        ->get();
 
         $meses = Bitacora::selectRaw("TO_CHAR(fecha_registro, 'YYYY-MM') as mes")
             ->distinct()
@@ -46,11 +48,14 @@ class BitacoraController extends Controller
 
     public function create()
     {
+        abort_if(auth()->id() == 8, 403);
         return view('bitacoras.create');
     }
 
     public function store(Request $request)
     {
+        abort_if(auth()->id() == 8, 403);
+        
         $data = $request->validate([
             'tipo_caso' => 'required|string|max:255',
             'proceso' => 'required|string|max:255',
