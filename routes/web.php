@@ -4,29 +4,23 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BitacoraController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
-Route::redirect('/', '/login');
-
-Route::get('/bitacoras-exportar', [BitacoraController::class, 'exportar'])
-    ->name('bitacoras.exportar');
-
-Route::get('/bitacoras-generar-ppt', [BitacoraController::class, 'generarPpt'])
-    ->name('bitacoras.generarPpt');
-
-Route::post('/bitacoras/generar-pdf', [BitacoraController::class, 'generarPdf'])
-    ->name('bitacoras.generarPdf');
+Route::get('/', function () {
+    return redirect()->route('bitacoras.index');
+})->middleware('auth');
 
 Route::middleware(['auth'])->group(function () {
 
-    // Bitácoras
+    Route::get('/bitacoras-exportar', [BitacoraController::class, 'exportar'])
+        ->name('bitacoras.exportar');
+
+    Route::get('/bitacoras-generar-ppt', [BitacoraController::class, 'generarPpt'])
+        ->name('bitacoras.generarPpt');
+
+    Route::post('/bitacoras/generar-pdf', [BitacoraController::class, 'generarPdf'])
+        ->name('bitacoras.generarPdf');
+
     Route::resource('bitacoras', BitacoraController::class);
 
-    // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
